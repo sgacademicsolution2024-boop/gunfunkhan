@@ -15,7 +15,92 @@ export default function BillModal({ bill, isOpen, onClose, onNewBill }: BillModa
   if (!bill) return null;
 
   const handlePrint = () => {
-    window.print();
+    const receiptEl = document.querySelector(".print-receipt-wrapper");
+    if (!receiptEl) return;
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bill GFK-${String(bill.billNumber).padStart(3, "0")}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 80mm;
+      background: white;
+      color: black;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+    body { padding: 4mm; }
+    .text-center  { text-align: center; }
+    .text-right   { text-align: right; }
+    .text-left    { text-align: left; }
+    .font-bold    { font-weight: bold; }
+    .font-mono    { font-family: 'Courier New', Courier, monospace; }
+    .font-serif   { font-family: Georgia, serif; }
+    .italic       { font-style: italic; }
+    .uppercase    { text-transform: uppercase; }
+    .tracking-wide { letter-spacing: 0.05em; }
+    .leading-tight { line-height: 1.25; }
+    .flex         { display: flex; }
+    .flex-col     { flex-direction: column; }
+    .justify-between { justify-content: space-between; }
+    .justify-end  { justify-content: flex-end; }
+    .items-start  { align-items: flex-start; }
+    .flex-1       { flex: 1; }
+    .border-b     { border-bottom: 1px solid black; }
+    .border-b-2   { border-bottom: 2px solid black; }
+    .border-b-4   { border-bottom: 4px double black; }
+    .my-2         { margin: 4px 0; }
+    .mt-1         { margin-top: 2px; }
+    .mt-2         { margin-top: 4px; }
+    .mt-3         { margin-top: 6px; }
+    .mt-4         { margin-top: 8px; }
+    .mb-1         { margin-bottom: 2px; }
+    .mb-4         { margin-bottom: 8px; }
+    .mr-4         { margin-right: 8px; }
+    .pr-2         { padding-right: 4px; }
+    .py-0\\.5     { padding: 1px 0; }
+    .space-y-0\\.5 > * + * { margin-top: 2px; }
+    .space-y-1 > * + * { margin-top: 2px; }
+    .space-y-1\\.5 > * + * { margin-top: 3px; }
+    .text-xl      { font-size: 14px; }
+    .text-base    { font-size: 12px; }
+    .text-sm      { font-size: 11px; }
+    .text-xs      { font-size: 10px; }
+    .w-8          { width: 20px; }
+    .w-16         { width: 40px; }
+    .tabular-nums { font-variant-numeric: tabular-nums; }
+    .truncate     { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    .text-emerald-600 { color: #059669; }
+    .text-gray-500 { color: #6b7280; }
+    .underline    { text-decoration: underline; }
+    @media print {
+      html, body { width: 80mm; }
+      @page { margin: 0; size: 80mm auto; }
+    }
+  </style>
+</head>
+<body>
+${receiptEl.innerHTML}
+</body>
+</html>`;
+
+    const win = window.open("", "_blank", "width=400,height=700");
+    if (!win) {
+      window.print();
+      return;
+    }
+    win.document.write(html);
+    win.document.close();
+    win.focus();
+    setTimeout(() => {
+      win.print();
+      win.close();
+    }, 300);
   };
 
   const handleNewBill = () => {
@@ -140,7 +225,7 @@ export default function BillModal({ bill, isOpen, onClose, onNewBill }: BillModa
             data-testid="btn-modal-print"
           >
             <Printer className="w-4 h-4 mr-2" />
-            Print Bill
+            Print / Save PDF
           </Button>
         </DialogFooter>
       </DialogContent>
