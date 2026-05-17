@@ -4,6 +4,7 @@ import { Receipt, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import type { Bill } from "@/types/billing";
 import { getBills, clearBills } from "@/lib/storage";
 import { Button } from "@/components/ui/button";
+import Logo from "@/components/Logo";
 
 function BillCard({ bill }: { bill: Bill }) {
   const [expanded, setExpanded] = useState(false);
@@ -105,10 +106,10 @@ export default function HistoryScreen() {
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
-      <header className="sticky top-0 bg-card border-b px-4 py-4 z-10 flex justify-between items-center shadow-sm">
-        <div className="flex items-center gap-2 text-primary">
-          <Receipt className="w-6 h-6" />
-          <h1 className="text-xl font-serif font-bold text-foreground">Bill History</h1>
+      <header className="sticky top-0 bg-primary text-primary-foreground border-b px-4 py-2.5 z-10 flex justify-between items-center shadow-sm">
+        <div className="flex items-center gap-2.5">
+          <Logo size="sm" className="shadow-sm" />
+          <h1 className="text-lg font-serif font-bold">Bill History</h1>
         </div>
         {bills.length > 0 && (
           <Button 

@@ -6,6 +6,7 @@ import type { Bill, PaymentMode } from "@/types/billing";
 import { Input } from "@/components/ui/input";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import BillModal from "@/components/BillModal";
+import Logo from "@/components/Logo";
 
 export default function BillingScreen() {
   const [activeCategory, setActiveCategory] = useState<Category>("All");
@@ -249,8 +250,8 @@ export default function BillingScreen() {
       <div className="hidden md:flex h-screen bg-background overflow-hidden">
         {/* Left: Menu */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          <header className="flex items-center gap-3 px-5 py-3.5 bg-primary text-primary-foreground shadow-md shrink-0">
-            <Music2 className="w-6 h-6" />
+          <header className="flex items-center gap-3 px-5 py-2.5 bg-primary text-primary-foreground shadow-md shrink-0">
+            <Logo size="md" className="shadow-sm" />
             <h1 className="text-xl font-serif font-bold tracking-tight">Gaan Fun Khaan</h1>
           </header>
 
@@ -313,10 +314,10 @@ export default function BillingScreen() {
           /* MENU VIEW */
           <>
             {/* Header */}
-            <header className="flex items-center justify-between px-4 py-3 bg-primary text-primary-foreground shadow-md shrink-0">
-              <div className="flex items-center gap-2">
-                <Music2 className="w-5 h-5" />
-                <h1 className="text-lg font-serif font-bold">Gaan Fun Khaan</h1>
+            <header className="flex items-center justify-between px-4 py-2 bg-primary text-primary-foreground shadow-md shrink-0">
+              <div className="flex items-center gap-2.5">
+                <Logo size="sm" className="shadow-sm" />
+                <h1 className="text-base font-serif font-bold">Gaan Fun Khaan</h1>
               </div>
               {cartCount > 0 && (
                 <button

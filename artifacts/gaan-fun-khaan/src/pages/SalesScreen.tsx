@@ -3,6 +3,7 @@ import { format, isToday, isYesterday, isThisWeek, parseISO } from "date-fns";
 import { BarChart2, TrendingUp, CreditCard, Smartphone, Banknote, Trash2, Printer, FileText } from "lucide-react";
 import { getBills, clearTodaysBills } from "@/lib/storage";
 import type { Bill } from "@/types/billing";
+import Logo from "@/components/Logo";
 
 type DateFilter = "Today" | "Yesterday" | "This Week" | "All Time";
 
@@ -180,9 +181,9 @@ export default function SalesScreen() {
       {/* SCREEN UI */}
       <header className="sticky top-0 bg-card border-b px-4 py-4 z-10 shadow-sm">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <BarChart2 className="w-6 h-6 text-primary" />
-            <h1 className="text-xl font-serif font-bold text-foreground">Daily Sales</h1>
+          <div className="flex items-center gap-2.5">
+            <Logo size="sm" className="shadow-sm" />
+            <h1 className="text-lg font-serif font-bold text-foreground">Daily Sales</h1>
           </div>
           <div className="flex items-center gap-2">
             {filteredBills.length > 0 && (
