@@ -1,13 +1,13 @@
 import { Link, useLocation } from "wouter";
-import { ShoppingCart, Receipt, BarChart2 } from "lucide-react";
+import { Home, Receipt, BarChart2 } from "lucide-react";
 
 export default function NavBar() {
   const [location] = useLocation();
 
   const links = [
-    { href: "/", label: "Billing", icon: ShoppingCart },
+    { href: "/", label: "Home", icon: Home },
     { href: "/history", label: "History", icon: Receipt },
-    { href: "/sales", label: "Sales", icon: BarChart2 },
+    { href: "/sales", label: "Reports", icon: BarChart2 },
   ];
 
   return (
@@ -33,8 +33,6 @@ export default function NavBar() {
           })}
         </div>
       </div>
-
-      {/* Desktop side/top nav could go here if needed, sticking to the main container */}
     </>
   );
 }
