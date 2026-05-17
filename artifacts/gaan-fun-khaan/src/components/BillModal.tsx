@@ -35,81 +35,91 @@ export default function BillModal({ bill, isOpen, onClose, onNewBill }: BillModa
         <div className="p-6 bg-slate-100 flex justify-center max-h-[60vh] overflow-y-auto">
           <div className="print-receipt-wrapper bg-white shadow-sm w-[80mm] p-4 text-xs font-mono border border-slate-200 mx-auto">
             <div className="text-center mb-4">
-              <div className="font-bold text-lg leading-tight uppercase tracking-wide">Gaan Fun Khaan</div>
-              <div className="text-[10px] mt-1 italic">A Symphony of Food & Music</div>
+              <div className="font-bold text-xl leading-tight uppercase tracking-wide">GAAN FUN KHAAN</div>
+              <div className="text-[10px] mt-1 italic font-serif">A Symphony of Food & Music</div>
             </div>
             
-            <div className="border-b border-dashed border-slate-400 my-2"></div>
+            <div className="border-b border-solid border-black my-2"></div>
             
-            <div className="flex justify-between">
-              <span>Bill No: GFK-{String(bill.billNumber).padStart(3, "0")}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Date: {format(new Date(bill.date), "dd MMM yyyy, h:mm a")}</span>
-            </div>
-            {bill.tableNumber && (
-              <div className="flex justify-between font-bold">
-                <span>Table: {bill.tableNumber}</span>
+            <div className="flex flex-col text-[11px] space-y-0.5">
+              <div className="flex justify-end">
+                <span>Bill No: GFK-{String(bill.billNumber).padStart(3, "0")}</span>
               </div>
-            )}
-
-            <div className="border-b border-dashed border-slate-400 my-2"></div>
-            
-            <div className="flex justify-between font-bold mb-1">
-              <span className="flex-1">Item</span>
-              <span className="w-8 text-center">Qty</span>
-              <span className="w-16 text-right">Amt</span>
-            </div>
-            
-            <div className="border-b border-dashed border-slate-400 my-2"></div>
-
-            {bill.items.map((item, idx) => (
-              <div key={idx} className="flex justify-between mb-1">
-                <span className="flex-1 truncate pr-2">{item.name}</span>
-                <span className="w-8 text-center">{item.quantity}</span>
-                <span className="w-16 text-right">₹{(item.price * item.quantity).toFixed(2)}</span>
+              <div className="flex justify-end">
+                <span>Date: {format(new Date(bill.date), "dd MMM yyyy")}</span>
               </div>
-            ))}
-
-            <div className="border-b border-dashed border-slate-400 my-2"></div>
-
-            <div className="flex justify-between mb-1">
-              <span>Subtotal:</span>
-              <span>₹{bill.subtotal.toFixed(2)}</span>
-            </div>
-            
-            {bill.discountPercent > 0 && (
-              <div className="flex justify-between mb-1">
-                <span>Discount ({bill.discountPercent}%):</span>
-                <span>-₹{bill.discountAmount.toFixed(2)}</span>
+              <div className="flex justify-end">
+                <span>Time: {format(new Date(bill.date), "h:mm a")}</span>
               </div>
-            )}
+              {bill.tableNumber && (
+                <div className="flex justify-end font-bold">
+                  <span>Table: {bill.tableNumber}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="border-b border-solid border-black my-2"></div>
             
-            {bill.gstPercent > 0 && (
-              <div className="flex justify-between mb-1">
-                <span>GST ({bill.gstPercent}%):</span>
-                <span>₹{bill.gstAmount.toFixed(2)}</span>
+            <div className="flex justify-between font-bold mb-1 underline">
+              <span className="flex-1 text-left">ITEM</span>
+              <span className="w-8 text-center">QTY</span>
+              <span className="w-16 text-right">AMOUNT</span>
+            </div>
+            
+            <div className="flex flex-col space-y-1 mt-2">
+              {bill.items.map((item, idx) => (
+                <div key={idx} className="flex justify-between items-start">
+                  <span className="flex-1 pr-2 truncate">{item.name}</span>
+                  <span className="w-8 text-center tabular-nums">{item.quantity}</span>
+                  <span className="w-16 text-right tabular-nums">₹{(item.price * item.quantity).toFixed(2)}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="border-b-2 border-solid border-black my-2 mt-3"></div>
+
+            <div className="flex flex-col space-y-1 text-[11px]">
+              <div className="flex justify-end">
+                <span className="mr-4">Subtotal:</span>
+                <span className="w-16 text-right tabular-nums">₹{bill.subtotal.toFixed(2)}</span>
               </div>
-            )}
-
-            <div className="border-b border-slate-800 border-2 my-2"></div>
-
-            <div className="flex justify-between font-bold text-sm uppercase">
-              <span>Grand Total:</span>
-              <span>₹{bill.grandTotal.toFixed(2)}</span>
+              
+              {bill.discountPercent > 0 && (
+                <div className="flex justify-end text-emerald-600">
+                  <span className="mr-4">Discount ({bill.discountPercent}%):</span>
+                  <span className="w-16 text-right tabular-nums">-₹{bill.discountAmount.toFixed(2)}</span>
+                </div>
+              )}
+              
+              {bill.gstPercent > 0 && (
+                <div className="flex justify-end">
+                  <span className="mr-4">GST ({bill.gstPercent}%):</span>
+                  <span className="w-16 text-right tabular-nums">₹{bill.gstAmount.toFixed(2)}</span>
+                </div>
+              )}
             </div>
 
-            <div className="border-b border-slate-800 border-2 my-2"></div>
-            
-            <div className="flex justify-between mt-2">
-              <span>Payment:</span>
-              <span className="font-bold">{bill.paymentMode}</span>
+            <div className="border-b-4 border-double border-black my-2"></div>
+
+            <div className="flex justify-between font-bold text-base mt-1">
+              <span>TOTAL</span>
+              <span className="tabular-nums">₹{bill.grandTotal.toFixed(2)}</span>
+            </div>
+
+            <div className="flex justify-between mt-2 text-[11px]">
+              <span>Payment Mode:</span>
+              <span className="font-bold uppercase">{bill.paymentMode}</span>
             </div>
             
-            <div className="border-b border-dashed border-slate-400 my-4"></div>
+            <div className="border-b border-solid border-black my-4"></div>
 
-            <div className="text-center italic mt-4 mb-2">
-              Come for the Gaan,<br/>Stay for the Khaan!
+            <div className="text-center space-y-1">
+              <div className="font-bold">Thank you for your visit!</div>
+              <div className="italic font-serif">Come for the Gaan, Stay for the Khaan!</div>
+            </div>
+            
+            <div className="text-center text-[9px] text-gray-500 mt-4">
+              GAAN FUN KHAAN • Darjeeling Hills
             </div>
           </div>
         </div>

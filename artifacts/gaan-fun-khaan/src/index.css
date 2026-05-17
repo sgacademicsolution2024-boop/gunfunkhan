@@ -148,21 +148,38 @@
 }
 
 @media print {
-  body > *:not(.print-receipt-wrapper) { display: none !important; }
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 80mm !important;
+    background: white !important;
+  }
+  body > * {
+    display: none !important;
+  }
   .print-receipt-wrapper {
     display: block !important;
-    position: fixed;
-    top: 0; left: 0;
-    width: 80mm;
-    font-family: monospace;
-    font-size: 11px;
-    background: white;
-    padding: 8px;
-    color: black;
+    position: static !important;
+    width: 80mm !important;
+    max-width: 80mm !important;
+    font-family: 'Courier New', Courier, monospace !important;
+    font-size: 11px !important;
+    background: white !important;
+    color: black !important;
+    padding: 4mm !important;
+    margin: 0 !important;
+    line-height: 1.4 !important;
   }
 }
 
 @layer utilities {
+  .hide-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
   input[type="search"]::-webkit-search-cancel-button {
     @apply hidden;
   }

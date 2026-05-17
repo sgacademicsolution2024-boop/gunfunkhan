@@ -29,3 +29,15 @@ export function getNextBillNumber(): number {
   localStorage.setItem(COUNTER_KEY, String(next));
   return next;
 }
+
+export function clearTodaysBills(): void {
+  const bills = getBills();
+  const today = new Date();
+  const filtered = bills.filter(bill => {
+    const d = new Date(bill.date);
+    return !(d.getFullYear() === today.getFullYear() &&
+             d.getMonth() === today.getMonth() &&
+             d.getDate() === today.getDate());
+  });
+  localStorage.setItem(BILLS_KEY, JSON.stringify(filtered));
+}

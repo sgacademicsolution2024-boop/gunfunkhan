@@ -1,29 +1,30 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { format, isToday, isYesterday, isThisWeek, parseISO } from "date-fns";
-import { BarChart2, TrendingUp, IndianRupee, CreditCard, Smartphone, Banknote } from "lucide-react";
-import { getBills } from "@/lib/storage";
+import { BarChart2, TrendingUp, IndianRupee, CreditCard, Smartphone, Banknote, Trash2 } from "lucide-react";
+import { getBills, clearTodaysBills } from "@/lib/storage";
 
 type DateFilter = "Today" | "Yesterday" | "This Week" | "All Time";
 
 export default function SalesScreen() {
   const [filter, setFilter] = useState<DateFilter>("Today");
-  
-  const allBills = useMemo(() => getBills(), []);
+  const [allBills, setAllBills] = useState(() => getBills());
 
-  const filteredBills = useMemo(() => {
-    return allBills.filter(bill => {
-      const date = parseISO(bill.date);
-      switch (filter) {
-        case "Today": return isToday(date);
-        case "Yesterday": return isYesterday(date);
-        case "This Week": return isThisWeek(date);
-        case "All Time": return true;
-        default: return true;
-      }
-    });
-  }, [allBills, filter]);
+  const loadBills = () => {
+    setAllBills(getBills());
+  };
 
-  const stats = useMemo(() => {
+  const filteredBills = allBills.filter(bill => {
+    const date = parseISO(bill.date);
+    switch (filter) {
+      case "Today": return isToday(date);
+      case "Yesterday": return isYesterday(date);
+      case "This Week": return isThisWeek(date);
+      case "All Time": return true;
+      default: return true;
+    }
+  });
+
+  const stats = (() => {
     let totalSales = 0;
     let cashSales = 0;
     let upiSales = 0;
@@ -43,7 +44,14 @@ export default function SalesScreen() {
       upiSales,
       cardSales
     };
-  }, [filteredBills]);
+  })();
+
+  const handleClearTodaysSales = () => {
+    if (window.confirm("Clear all of today's sales data? This cannot be undone.")) {
+      clearTodaysBills();
+      loadBills();
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
@@ -53,6 +61,15 @@ export default function SalesScreen() {
             <BarChart2 className="w-6 h-6" />
             <h1 className="text-xl font-serif font-bold text-foreground">Daily Sales</h1>
           </div>
+          {filter === "Today" && filteredBills.length > 0 && (
+            <button 
+              onClick={handleClearTodaysSales}
+              className="flex items-center text-sm font-semibold text-destructive hover:bg-destructive/10 px-3 py-1.5 rounded-lg transition-colors"
+            >
+              <Trash2 className="w-4 h-4 mr-1.5" />
+              Clear Today's Sales
+            </button>
+          )}
         </div>
         
         <div className="mt-4 flex gap-2 overflow-x-auto hide-scrollbar pb-1">

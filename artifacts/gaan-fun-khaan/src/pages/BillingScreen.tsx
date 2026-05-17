@@ -2,11 +2,10 @@ import { useState } from "react";
 import { Music2, Plus, Minus, X, Trash2 } from "lucide-react";
 import { MENU_ITEMS, CATEGORIES, type Category } from "@/data/menu";
 import { useBilling } from "@/hooks/useBilling";
-import type { Bill } from "@/types/billing";
+import type { Bill, PaymentMode } from "@/types/billing";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import BillModal from "@/components/BillModal";
 
@@ -60,9 +59,9 @@ export default function BillingScreen() {
   };
 
   return (
-    <div className="flex flex-col h-screen md:flex-row bg-background font-sans overflow-hidden">
+    <div className="flex flex-col h-[100dvh] md:flex-row bg-background font-sans overflow-hidden">
       {/* Main Content Area (Menu & Categories) */}
-      <div className="flex-1 flex flex-col min-w-0 bg-background overflow-hidden relative pb-16 md:pb-0">
+      <div className="flex-1 flex flex-col min-w-0 bg-background overflow-hidden relative">
         
         {/* Header */}
         <header className="flex items-center justify-between px-4 py-3 bg-primary text-primary-foreground shadow-md z-10 shrink-0">
@@ -83,9 +82,9 @@ export default function BillingScreen() {
                 key={cat}
                 data-testid={`tab-category-${cat}`}
                 onClick={() => setActiveCategory(cat)}
-                className={`px-5 py-2 rounded-full font-bold transition-colors whitespace-nowrap text-sm ${
+                className={`px-5 py-2.5 rounded-full font-bold transition-colors whitespace-nowrap text-sm ${
                   activeCategory === cat 
-                    ? "bg-secondary text-secondary-foreground shadow-sm" 
+                    ? "bg-primary text-primary-foreground shadow-sm" 
                     : "bg-muted text-muted-foreground hover:bg-muted/80"
                 }`}
               >
@@ -96,8 +95,8 @@ export default function BillingScreen() {
         </div>
 
         {/* Menu Grid */}
-        <div className="flex-1 overflow-y-auto p-4 hide-scrollbar">
-          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4 pb-24 md:pb-4">
+        <div className="flex-1 overflow-y-auto p-4 hide-scrollbar pb-[280px] md:pb-4">
+          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredMenu.map(item => {
               const cartItem = cart.find(c => c.menuItemId === item.id);
               return (
@@ -105,7 +104,7 @@ export default function BillingScreen() {
                   key={item.id}
                   data-testid={`card-menuitem-${item.id}`}
                   onClick={() => handleItemClick(item)}
-                  className="relative flex flex-col justify-between text-left p-4 rounded-xl border-2 border-transparent bg-card shadow-sm hover:border-secondary hover:shadow-md transition-all h-32 active:scale-[0.98]"
+                  className="relative flex flex-col justify-between text-left p-4 rounded-xl border-2 border-transparent bg-card shadow-sm hover:border-primary/20 hover:shadow-md transition-all min-h-[88px] active:scale-95 active:ring-2 active:ring-primary/50"
                 >
                   {cartItem && (
                     <div className="absolute -top-2 -right-2 w-7 h-7 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold shadow-sm z-10">
@@ -125,16 +124,18 @@ export default function BillingScreen() {
         </div>
       </div>
 
-      {/* Cart Panel (Right side on desktop, stacked on mobile) */}
-      <div className="w-full md:w-[400px] lg:w-[450px] bg-card border-l flex flex-col shadow-xl z-20 md:h-screen shrink-0 absolute bottom-0 md:relative max-h-[60vh] md:max-h-full rounded-t-2xl md:rounded-none">
+      {/* Cart Panel (Pinned to bottom on mobile, right side on desktop) */}
+      <div className="fixed bottom-0 left-0 right-0 h-[280px] md:static md:w-[400px] lg:w-[450px] bg-card border-t md:border-l flex flex-col shadow-xl z-20 md:h-[100dvh] shrink-0 rounded-t-2xl md:rounded-none">
         
-        {/* Mobile handle indicator */}
-        <div className="w-12 h-1.5 bg-muted rounded-full mx-auto mt-3 md:hidden"></div>
-
         <div className="px-5 py-4 border-b flex justify-between items-center shrink-0">
-          <h2 className="text-xl font-serif font-bold text-foreground">Current Order</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-serif font-bold text-foreground">Current Order</h2>
+            <div className="bg-primary/10 text-primary px-2 py-0.5 rounded-full text-xs font-bold">
+              {cartCount} items
+            </div>
+          </div>
           <Button variant="ghost" size="sm" onClick={handleNewBill} className="text-destructive hover:text-destructive hover:bg-destructive/10" data-testid="btn-clear-cart">
-            <Trash2 className="w-4 h-4 mr-2" />
+            <Trash2 className="w-4 h-4 mr-1" />
             Clear
           </Button>
         </div>
@@ -147,7 +148,6 @@ export default function BillingScreen() {
                 <Music2 className="w-8 h-8 opacity-50" />
               </div>
               <p className="font-medium">No items yet</p>
-              <p className="text-sm">Tap items from the menu to start building an order.</p>
             </div>
           ) : (
             <div className="space-y-2 px-3 pb-4">
@@ -155,7 +155,7 @@ export default function BillingScreen() {
                 <div key={item.menuItemId} className="flex items-center py-2 bg-muted/30 p-3 rounded-lg" data-testid={`row-cartitem-${item.menuItemId}`}>
                   <div className="flex-1 min-w-0 pr-2">
                     <div className="font-semibold text-foreground truncate">{item.name}</div>
-                    <div className="text-sm text-muted-foreground">₹{item.price.toFixed(2)}</div>
+                    <div className="text-xs text-muted-foreground">₹{item.price.toFixed(2)}</div>
                   </div>
                   
                   <div className="flex items-center gap-3">
@@ -167,7 +167,7 @@ export default function BillingScreen() {
                       >
                         <Minus className="w-4 h-4" />
                       </button>
-                      <span className="w-6 text-center font-bold text-sm">{item.quantity}</span>
+                      <span className="w-6 text-center font-bold text-sm tabular-nums">{item.quantity}</span>
                       <button 
                         className="w-8 h-8 flex items-center justify-center text-foreground hover:bg-muted active:bg-muted/80 transition-colors"
                         onClick={() => updateQuantity(item.menuItemId, item.quantity + 1)}
@@ -177,7 +177,7 @@ export default function BillingScreen() {
                       </button>
                     </div>
                     
-                    <div className="w-16 text-right font-bold tabular-nums">
+                    <div className="w-16 text-right font-bold tabular-nums text-sm">
                       ₹{(item.price * item.quantity).toFixed(2)}
                     </div>
                     
@@ -195,23 +195,22 @@ export default function BillingScreen() {
           )}
         </div>
 
-        {/* Cart Footer (Totals & Payment) */}
-        <div className="bg-card border-t p-4 md:p-5 pb-20 md:pb-5 space-y-4 shrink-0 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)]">
+        {/* Cart Footer (Totals & Payment) - NEVER SCROLLS */}
+        <div className="bg-card border-t p-3 md:p-5 shrink-0 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)]">
           
-          <div className="space-y-1.5">
-            <Label htmlFor="table" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Table No.</Label>
-            <Input
-              id="table"
-              type="text"
-              placeholder="e.g. T1, T2"
-              value={tableNumber}
-              onChange={(e) => setTableNumber(e.target.value)}
-              className="bg-muted border-transparent focus-visible:ring-primary h-10"
-              data-testid="input-table-number"
-            />
-          </div>
-
-          <div className="flex gap-4">
+          <div className="flex gap-2 mb-3 hidden md:flex">
+            <div className="flex-1 space-y-1.5">
+              <Label htmlFor="table" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Table No.</Label>
+              <Input
+                id="table"
+                type="text"
+                placeholder="e.g. T1, T2"
+                value={tableNumber}
+                onChange={(e) => setTableNumber(e.target.value)}
+                className="bg-muted border-transparent focus-visible:ring-primary h-10"
+                data-testid="input-table-number"
+              />
+            </div>
             <div className="flex-1 space-y-1.5">
               <Label htmlFor="discount" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Discount %</Label>
               <Input 
@@ -240,7 +239,41 @@ export default function BillingScreen() {
             </div>
           </div>
 
-          <div className="space-y-1.5 pt-2">
+          <div className="flex md:hidden gap-2 mb-3">
+             <Input
+                id="table-m"
+                type="text"
+                placeholder="Table No"
+                value={tableNumber}
+                onChange={(e) => setTableNumber(e.target.value)}
+                className="bg-muted border-transparent focus-visible:ring-primary h-9 text-xs flex-1"
+                data-testid="input-table-number"
+              />
+              <Input 
+                id="discount-m"
+                type="number" 
+                placeholder="Disc %"
+                min="0" 
+                max="100" 
+                value={discountPercent || ""} 
+                onChange={(e) => setDiscountPercent(Number(e.target.value))}
+                className="bg-muted border-transparent focus-visible:ring-primary h-9 text-xs w-20"
+                data-testid="input-discount"
+              />
+              <Input 
+                id="gst-m"
+                type="number" 
+                placeholder="GST %"
+                min="0" 
+                max="100" 
+                value={gstPercent || ""} 
+                onChange={(e) => setGstPercent(Number(e.target.value))}
+                className="bg-muted border-transparent focus-visible:ring-primary h-9 text-xs w-20"
+                data-testid="input-gst"
+              />
+          </div>
+
+          <div className="space-y-1 md:space-y-1.5 hidden md:block">
             <div className="flex justify-between text-sm text-muted-foreground">
               <span>Subtotal</span>
               <span>₹{subtotal.toFixed(2)}</span>
@@ -257,41 +290,44 @@ export default function BillingScreen() {
                 <span>₹{gstAmount.toFixed(2)}</span>
               </div>
             )}
-            <div className="flex justify-between items-end pt-2 mt-2 border-t">
-              <span className="font-serif font-bold text-lg">Total</span>
-              <span className="font-sans font-black text-3xl text-primary tabular-nums tracking-tight">₹{grandTotal.toFixed(2)}</span>
-            </div>
           </div>
 
-          <div className="pt-2">
-            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Payment Mode</Label>
+          <div className="flex justify-between items-center py-2 md:pt-3 md:mt-2 md:border-t">
+            <div className="flex flex-col">
+              <span className="font-serif font-bold text-lg md:text-xl">Total</span>
+              {(discountAmount > 0 || gstAmount > 0) && <span className="text-xs text-muted-foreground md:hidden">inc. taxes/disc</span>}
+            </div>
+            <span className="font-sans font-black text-2xl md:text-3xl text-primary tabular-nums tracking-tight">₹{grandTotal.toFixed(2)}</span>
+          </div>
+
+          <div className="pt-2 md:pt-3 flex flex-col md:flex-row gap-3">
             <ToggleGroup 
               type="single" 
               value={paymentMode} 
               onValueChange={(v) => v && setPaymentMode(v as PaymentMode)}
-              className="justify-start gap-2 bg-muted p-1 rounded-xl"
+              className="justify-start gap-1 md:gap-2 bg-muted p-1 rounded-xl flex-1"
             >
               {(["Cash", "UPI", "Card"] as const).map(mode => (
                 <ToggleGroupItem 
                   key={mode} 
                   value={mode} 
-                  className={`flex-1 rounded-lg font-bold data-[state=on]:bg-white data-[state=on]:text-primary data-[state=on]:shadow-sm transition-all`}
+                  className={`flex-1 rounded-lg font-bold text-xs md:text-sm data-[state=on]:bg-white data-[state=on]:text-primary data-[state=on]:shadow-sm transition-all h-10 md:h-12`}
                   data-testid={`toggle-payment-${mode}`}
                 >
                   {mode}
                 </ToggleGroupItem>
               ))}
             </ToggleGroup>
-          </div>
 
-          <Button 
-            className="w-full h-14 text-lg font-bold rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all active:scale-[0.98]"
-            disabled={cart.length === 0}
-            onClick={handleGenerateBill}
-            data-testid="btn-generate-bill"
-          >
-            GENERATE BILL
-          </Button>
+            <Button 
+              className="w-full md:w-auto md:px-8 h-10 md:h-12 text-sm md:text-lg font-bold rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all active:scale-[0.98]"
+              disabled={cart.length === 0}
+              onClick={handleGenerateBill}
+              data-testid="btn-generate-bill"
+            >
+              GENERATE BILL
+            </Button>
+          </div>
         </div>
       </div>
 
