@@ -4,6 +4,7 @@ import { saveBill, getNextBillNumber } from "@/lib/storage";
 
 export function useBilling() {
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [tableNumber, setTableNumber] = useState("");
   const [discountPercent, setDiscountPercent] = useState(0);
   const [gstPercent, setGstPercent] = useState(0);
   const [paymentMode, setPaymentMode] = useState<PaymentMode>("Cash");
@@ -38,6 +39,7 @@ export function useBilling() {
 
   const clearCart = useCallback(() => {
     setCart([]);
+    setTableNumber("");
     setDiscountPercent(0);
     setGstPercent(0);
     setPaymentMode("Cash");
@@ -49,6 +51,7 @@ export function useBilling() {
       id: "GFK-" + String(billNumber).padStart(3, "0"),
       billNumber,
       date: new Date().toISOString(),
+      tableNumber,
       items: cart,
       subtotal,
       discountPercent,
@@ -60,10 +63,11 @@ export function useBilling() {
     };
     saveBill(bill);
     return bill;
-  }, [cart, subtotal, discountPercent, discountAmount, gstPercent, gstAmount, grandTotal, paymentMode]);
+  }, [cart, tableNumber, subtotal, discountPercent, discountAmount, gstPercent, gstAmount, grandTotal, paymentMode]);
 
   return {
     cart, addToCart, removeFromCart, updateQuantity, clearCart,
+    tableNumber, setTableNumber,
     discountPercent, setDiscountPercent,
     gstPercent, setGstPercent,
     paymentMode, setPaymentMode,

@@ -47,6 +47,11 @@ export default function BillModal({ bill, isOpen, onClose, onNewBill }: BillModa
             <div className="flex justify-between">
               <span>Date: {format(new Date(bill.date), "dd MMM yyyy, h:mm a")}</span>
             </div>
+            {bill.tableNumber && (
+              <div className="flex justify-between font-bold">
+                <span>Table: {bill.tableNumber}</span>
+              </div>
+            )}
 
             <div className="border-b border-dashed border-slate-400 my-2"></div>
             

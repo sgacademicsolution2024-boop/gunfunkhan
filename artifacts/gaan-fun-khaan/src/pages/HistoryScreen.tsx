@@ -27,6 +27,11 @@ function BillCard({ bill }: { bill: Bill }) {
           <div>
             <div className="font-serif font-bold text-foreground text-lg">{bill.id}</div>
             <div className="text-sm text-muted-foreground">{format(new Date(bill.date), "dd MMM yyyy, h:mm a")}</div>
+            {bill.tableNumber && (
+              <div className="text-sm font-semibold text-accent-foreground bg-accent/20 inline-block px-2 py-0.5 rounded mt-1">
+                Table {bill.tableNumber}
+              </div>
+            )}
           </div>
           <div className="text-right">
             <div className="font-black text-xl text-primary tabular-nums">₹{bill.grandTotal.toFixed(2)}</div>

@@ -11,6 +11,7 @@ export type Bill = {
   id: string;
   billNumber: number;
   date: string;
+  tableNumber: string;
   items: CartItem[];
   subtotal: number;
   discountPercent: number;

@@ -17,6 +17,7 @@ export default function BillingScreen() {
 
   const {
     cart, addToCart, removeFromCart, updateQuantity, clearCart, cartCount,
+    tableNumber, setTableNumber,
     discountPercent, setDiscountPercent,
     gstPercent, setGstPercent,
     paymentMode, setPaymentMode,
@@ -197,6 +198,19 @@ export default function BillingScreen() {
         {/* Cart Footer (Totals & Payment) */}
         <div className="bg-card border-t p-4 md:p-5 pb-20 md:pb-5 space-y-4 shrink-0 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)]">
           
+          <div className="space-y-1.5">
+            <Label htmlFor="table" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Table No.</Label>
+            <Input
+              id="table"
+              type="text"
+              placeholder="e.g. T1, T2"
+              value={tableNumber}
+              onChange={(e) => setTableNumber(e.target.value)}
+              className="bg-muted border-transparent focus-visible:ring-primary h-10"
+              data-testid="input-table-number"
+            />
+          </div>
+
           <div className="flex gap-4">
             <div className="flex-1 space-y-1.5">
               <Label htmlFor="discount" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Discount %</Label>
