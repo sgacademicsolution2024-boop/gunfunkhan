@@ -170,6 +170,16 @@
     margin: 0 !important;
     line-height: 1.4 !important;
   }
+  .sales-report-print {
+    display: block !important;
+    position: static !important;
+    width: 80mm !important;
+    max-width: 80mm !important;
+    background: white !important;
+    color: black !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
 }
 
 @layer utilities {
