@@ -154,21 +154,24 @@
     width: 80mm !important;
     background: white !important;
   }
-  body > * {
-    display: none !important;
+  body * {
+    visibility: hidden !important;
   }
   .print-receipt-wrapper {
     display: block !important;
-    position: static !important;
+    position: fixed !important;
+    inset: 0 auto auto 0 !important;
     width: 80mm !important;
     max-width: 80mm !important;
-    font-family: 'Courier New', Courier, monospace !important;
-    font-size: 11px !important;
     background: white !important;
     color: black !important;
     padding: 4mm !important;
     margin: 0 !important;
-    line-height: 1.4 !important;
+    box-shadow: none !important;
+  }
+  .print-receipt-wrapper,
+  .print-receipt-wrapper * {
+    visibility: visible !important;
   }
   .sales-report-print {
     display: block !important;

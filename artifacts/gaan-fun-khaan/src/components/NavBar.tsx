@@ -1,13 +1,15 @@
 import { Link, useLocation } from "wouter";
-import { Home, Receipt, BarChart2 } from "lucide-react";
+import { BarChart2, Home, Package, Receipt, Settings } from "lucide-react";
 
 export default function NavBar() {
   const [location] = useLocation();
 
   const links = [
-    { href: "/", label: "Home", icon: Home },
+    { href: "/", label: "Billing", icon: Home },
     { href: "/history", label: "History", icon: Receipt },
-    { href: "/sales", label: "Reports", icon: BarChart2 },
+    { href: "/sales", label: "Sales", icon: BarChart2 },
+    { href: "/inventory", label: "Stock", icon: Package },
+    { href: "/settings", label: "Settings", icon: Settings },
   ];
 
   return (

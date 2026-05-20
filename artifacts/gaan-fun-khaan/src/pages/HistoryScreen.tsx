@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { Receipt, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import type { Bill } from "@/types/billing";
 import { getBills, clearBills } from "@/lib/storage";
+import { getMyRestaurant, getOrders } from "@/lib/posApi";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/Logo";
 
@@ -92,9 +93,28 @@ function BillCard({ bill }: { bill: Bill }) {
 
 export default function HistoryScreen() {
   const [bills, setBills] = useState<Bill[]>([]);
+  const [notice, setNotice] = useState("");
 
   useEffect(() => {
-    setBills(getBills());
+    async function loadBills() {
+      try {
+        const restaurant = await getMyRestaurant();
+        if (!restaurant?.id) {
+          setBills(getBills());
+          setNotice("Showing local bills. Save restaurant settings after Supabase sign-in to see cloud history.");
+          return;
+        }
+
+        const cloudBills = await getOrders(restaurant.id);
+        setBills(cloudBills);
+        setNotice("");
+      } catch (error) {
+        setBills(getBills());
+        setNotice(error instanceof Error ? error.message : "Showing local bills until Supabase is ready.");
+      }
+    }
+
+    loadBills();
   }, []);
 
   const handleClearAll = () => {
@@ -129,6 +149,11 @@ export default function HistoryScreen() {
         <div className="mb-4 text-sm font-medium text-muted-foreground">
           Showing {bills.length} bills
         </div>
+        {notice && (
+          <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900">
+            {notice}
+          </div>
+        )}
 
         {bills.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 text-muted-foreground">

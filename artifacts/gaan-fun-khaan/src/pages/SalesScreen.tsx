@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   format, isToday, isYesterday, isThisWeek, parseISO,
   startOfWeek, endOfWeek, eachDayOfInterval,
@@ -12,6 +12,7 @@ import {
 import { getBills, clearTodaysBills } from "@/lib/storage";
 import type { Bill } from "@/types/billing";
 import Logo from "@/components/Logo";
+import { getMyRestaurant, getOrders } from "@/lib/posApi";
 
 type Period = "Daily" | "Weekly" | "Monthly" | "All Time";
 
@@ -338,11 +339,31 @@ function Row({ label, value }: { label: string; value: string }) {
 export default function SalesScreen() {
   const [period, setPeriod] = useState<Period>("Daily");
   const [allBills, setAllBills] = useState(() => getBills());
+  const [notice, setNotice] = useState("");
+
+  useEffect(() => {
+    reload();
+  }, []);
 
   const filtered = filterBills(allBills, period);
   const stats    = computeStats(filtered);
 
-  const reload = () => setAllBills(getBills());
+  const reload = async () => {
+    try {
+      const restaurant = await getMyRestaurant();
+      if (!restaurant?.id) {
+        setAllBills(getBills());
+        setNotice("Showing local sales. Supabase cloud reports will appear after restaurant settings are saved.");
+        return;
+      }
+
+      setAllBills(await getOrders(restaurant.id));
+      setNotice("");
+    } catch (error) {
+      setAllBills(getBills());
+      setNotice(error instanceof Error ? error.message : "Showing local sales until Supabase is ready.");
+    }
+  };
 
   const periodLabel =
     period === "Daily"   ? format(new Date(), "dd MMM yyyy") :
@@ -353,7 +374,7 @@ export default function SalesScreen() {
   const handleClear = () => {
     if (window.confirm("Clear all of today's sales? This cannot be undone.")) {
       clearTodaysBills();
-      reload();
+      void reload();
     }
   };
 
@@ -413,6 +434,11 @@ export default function SalesScreen() {
       </header>
 
       <div className="p-4 max-w-3xl mx-auto space-y-4">
+        {notice && (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900">
+            {notice}
+          </div>
+        )}
 
         {/* Hero Total */}
         <div className="bg-primary text-primary-foreground rounded-2xl p-5 shadow-lg relative overflow-hidden">
