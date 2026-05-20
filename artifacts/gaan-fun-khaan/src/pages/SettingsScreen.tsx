@@ -44,8 +44,8 @@ export default function SettingsScreen() {
 
   return (
     <div className="min-h-screen bg-background pb-24 md:pb-6">
-      <header className="sticky top-0 z-10 bg-primary px-4 py-3 text-primary-foreground shadow-md">
-        <div className="mx-auto flex max-w-3xl items-center gap-2.5">
+      <header className="sticky top-0 z-10 bg-primary px-4 py-3 pr-4 text-primary-foreground shadow-md md:pr-[470px] lg:pr-[560px]">
+        <div className="mx-auto flex max-w-5xl items-center gap-2.5">
           <Logo size="sm" className="shadow-sm" />
           <div>
             <h1 className="font-serif text-lg font-bold">Restaurant Settings</h1>
@@ -54,20 +54,20 @@ export default function SettingsScreen() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl space-y-4 p-4">
+      <main className="mx-auto max-w-5xl space-y-4 p-3 sm:p-4 xl:p-5">
         {notice && (
           <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900">
             {notice}
           </div>
         )}
 
-        <div className="rounded-xl border bg-card p-4 shadow-sm">
+        <div className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
           <div className="mb-4 flex items-center gap-2">
             <Settings className="h-5 w-5 text-primary" />
             <h2 className="font-serif text-lg font-bold">Business Details</h2>
           </div>
 
-          <div className="grid gap-3 md:grid-cols-2">
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             <Field label="Restaurant name">
               <Input value={settings.name} onChange={(event) => updateField("name", event.target.value)} />
             </Field>

@@ -126,7 +126,7 @@ export default function HistoryScreen() {
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
-      <header className="sticky top-0 bg-primary text-primary-foreground border-b px-4 py-2.5 z-10 flex justify-between items-center shadow-sm">
+      <header className="sticky top-0 z-10 flex items-center justify-between border-b bg-primary px-4 py-2.5 pr-4 text-primary-foreground shadow-sm md:pr-[470px] lg:pr-[560px]">
         <div className="flex items-center gap-2.5">
           <Logo size="sm" className="shadow-sm" />
           <h1 className="text-lg font-serif font-bold">Bill History</h1>
@@ -145,7 +145,7 @@ export default function HistoryScreen() {
         )}
       </header>
 
-      <div className="p-4 max-w-3xl mx-auto">
+      <div className="mx-auto max-w-4xl p-3 sm:p-4">
         <div className="mb-4 text-sm font-medium text-muted-foreground">
           Showing {bills.length} bills
         </div>

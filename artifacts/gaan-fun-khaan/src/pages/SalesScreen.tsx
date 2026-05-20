@@ -385,7 +385,7 @@ export default function SalesScreen() {
       <PrintableReport period={period} stats={stats} periodLabel={periodLabel} />
 
       {/* Header */}
-      <header className="sticky top-0 bg-primary text-primary-foreground px-4 pt-3 pb-0 z-10 shadow-md">
+      <header className="sticky top-0 z-10 bg-primary px-4 pb-0 pt-3 pr-4 text-primary-foreground shadow-md md:pr-[470px] lg:pr-[560px]">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2.5">
             <Logo size="sm" className="shadow-sm" />
@@ -433,7 +433,7 @@ export default function SalesScreen() {
         </div>
       </header>
 
-      <div className="p-4 max-w-3xl mx-auto space-y-4">
+      <div className="mx-auto max-w-5xl space-y-4 p-3 sm:p-4 xl:p-5">
         {notice && (
           <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900">
             {notice}
@@ -476,7 +476,7 @@ export default function SalesScreen() {
         ) : (
           <>
             {/* Key Numbers */}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
               <StatCard label="Bills"     value={String(stats.totalBills)} />
               <StatCard label="Avg Bill"  value={`₹${stats.avgBill.toFixed(0)}`} />
               <StatCard
@@ -512,7 +512,7 @@ export default function SalesScreen() {
               <div className="px-4 py-3.5 border-b">
                 <h3 className="font-serif font-bold text-sm text-foreground">Transactions</h3>
               </div>
-              <div className="divide-y max-h-[400px] overflow-y-auto hide-scrollbar">
+              <div className="hide-scrollbar max-h-[420px] divide-y overflow-y-auto">
                 {[...filtered].reverse().map(bill => (
                   <div key={bill.id} className="flex items-center justify-between px-4 py-3 hover:bg-muted/30 transition-colors" data-testid={`row-bill-${bill.id}`}>
                     <div>

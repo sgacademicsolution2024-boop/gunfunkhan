@@ -219,8 +219,8 @@ export default function BillingScreen() {
         )}
       </div>
 
-      <div className="shrink-0 space-y-3 border-t bg-card px-4 pb-4 pt-3">
-        <div className="grid grid-cols-3 gap-2">
+      <div className="shrink-0 space-y-3 border-t bg-card px-3 pb-4 pt-3 sm:px-4">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           <Field label="Table">
             <Input value={tableNumber} onChange={(e) => setTableNumber(e.target.value)} placeholder="T1" className="h-9 border-transparent bg-muted text-sm" />
           </Field>
@@ -286,27 +286,27 @@ export default function BillingScreen() {
     <>
       <div className="hidden h-screen overflow-hidden bg-background md:flex">
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-          <header className="flex shrink-0 items-center gap-3 bg-primary px-5 py-2.5 text-primary-foreground shadow-md">
+          <header className="flex min-h-14 shrink-0 items-center gap-3 bg-primary px-5 py-2.5 pr-[460px] text-primary-foreground shadow-md lg:pr-[560px]">
             <Logo size="md" className="shadow-sm" />
             <h1 className="font-serif text-xl font-bold tracking-tight">{restaurant.name}</h1>
           </header>
 
           <CategoryTabs categories={categories} activeCategory={activeCategory} setActiveCategory={setActiveCategory} />
 
-          <div className="hide-scrollbar flex-1 overflow-y-auto p-4">
+          <div className="hide-scrollbar flex-1 overflow-y-auto p-4 xl:p-5">
             <MenuGrid items={filteredMenu} cart={cart} onItemClick={handleItemClick} desktop />
           </div>
         </div>
-        <div className="h-full w-[380px] shrink-0 overflow-hidden border-l shadow-xl xl:w-[420px]">{CartPanel}</div>
+        <div className="h-full w-[360px] shrink-0 overflow-hidden border-l shadow-xl lg:w-[390px] xl:w-[430px]">{CartPanel}</div>
       </div>
 
       <div className="flex h-[100dvh] flex-col overflow-hidden bg-background md:hidden">
         {mobileView === "menu" ? (
           <>
-            <header className="flex shrink-0 items-center justify-between bg-primary px-4 py-2 text-primary-foreground shadow-md">
-              <div className="flex items-center gap-2.5">
+            <header className="flex min-h-14 shrink-0 items-center justify-between bg-primary px-4 py-2 text-primary-foreground shadow-md">
+              <div className="flex min-w-0 items-center gap-2.5">
                 <Logo size="sm" className="shadow-sm" />
-                <h1 className="font-serif text-base font-bold">{restaurant.name}</h1>
+                <h1 className="truncate font-serif text-base font-bold">{restaurant.name}</h1>
               </div>
               {cartCount > 0 && (
                 <button
@@ -322,7 +322,7 @@ export default function BillingScreen() {
 
             <CategoryTabs categories={categories} activeCategory={activeCategory} setActiveCategory={setActiveCategory} />
 
-            <div className="hide-scrollbar flex-1 overflow-y-auto p-3 pb-[72px]">
+            <div className="hide-scrollbar flex-1 overflow-y-auto p-3 pb-[76px]">
               <MenuGrid items={filteredMenu} cart={cart} onItemClick={handleItemClick} />
             </div>
 
@@ -330,16 +330,16 @@ export default function BillingScreen() {
               <div className="fixed bottom-16 left-0 right-0 z-30 px-3 pb-2">
                 <button
                   onClick={() => setMobileView("cart")}
-                  className="flex w-full items-center justify-between rounded-2xl bg-primary px-5 py-3.5 text-primary-foreground shadow-xl transition-all active:scale-[0.98]"
+                className="flex w-full items-center justify-between gap-3 rounded-2xl bg-primary px-4 py-3.5 text-primary-foreground shadow-xl transition-all active:scale-[0.98]"
                   data-testid="btn-cart-strip"
                 >
                   <div className="flex items-center gap-2 font-bold">
                     <ShoppingCart className="h-5 w-5" />
-                    <span>{cartCount} {cartCount === 1 ? "item" : "items"}</span>
+                    <span className="whitespace-nowrap">{cartCount} {cartCount === 1 ? "item" : "items"}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg font-black tabular-nums">Rs {grandTotal.toFixed(2)}</span>
-                    <span className="rounded-full bg-white/20 px-2 py-0.5 text-sm font-bold">View Cart</span>
+                  <div className="flex min-w-0 items-center gap-2">
+                    <span className="truncate text-lg font-black tabular-nums">Rs {grandTotal.toFixed(2)}</span>
+                    <span className="shrink-0 rounded-full bg-white/20 px-2 py-0.5 text-sm font-bold">View</span>
                   </div>
                 </button>
               </div>
@@ -426,7 +426,7 @@ function MenuGrid({
   desktop?: boolean;
 }) {
   return (
-    <div className={desktop ? "grid grid-cols-3 gap-3 xl:grid-cols-4" : "grid grid-cols-2 gap-3"}>
+    <div className={desktop ? "grid grid-cols-3 gap-3 lg:grid-cols-4 2xl:grid-cols-5" : "grid grid-cols-2 gap-3 min-[420px]:grid-cols-3"}>
       {items.map((item) => {
         const cartItem = cart.find((entry) => entry.menuItemId === item.id);
         const disabled = !item.isAvailable || (item.trackStock && item.stockQty <= 0);
@@ -437,7 +437,7 @@ function MenuGrid({
             data-testid={`card-menuitem-${item.id}`}
             onClick={() => onItemClick(item)}
             disabled={disabled}
-            className={`relative flex min-h-[90px] flex-col justify-between border-2 border-transparent bg-card p-4 text-left shadow-sm transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-45 ${
+            className={`relative flex min-h-[92px] flex-col justify-between border-2 border-transparent bg-card p-3.5 text-left shadow-sm transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-45 sm:p-4 ${
               desktop ? "rounded-xl hover:border-primary/20 hover:shadow-md" : "rounded-2xl active:border-primary/30"
             }`}
           >

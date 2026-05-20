@@ -32,11 +32,11 @@ export default function AuthScreen() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <div className="w-full max-w-sm rounded-2xl border bg-card p-5 shadow-lg">
+      <div className="w-full max-w-sm rounded-2xl border bg-card p-4 shadow-lg sm:p-5">
         <div className="mb-5 flex items-center gap-3">
-          <Logo size="md" />
-          <div>
-            <h1 className="font-serif text-xl font-black">Gaan Fun Khaan POS</h1>
+          <Logo size="sm" />
+          <div className="min-w-0">
+            <h1 className="text-balance font-serif text-lg font-black leading-tight sm:text-xl">Gaan Fun Khaan POS</h1>
             <p className="text-sm font-semibold text-muted-foreground">Staff sign in</p>
           </div>
         </div>

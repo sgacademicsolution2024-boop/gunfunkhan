@@ -156,8 +156,8 @@ export default function InventoryScreen() {
 
   return (
     <div className="min-h-screen bg-background pb-24 md:pb-6">
-      <header className="sticky top-0 z-10 bg-primary px-4 py-3 text-primary-foreground shadow-md">
-        <div className="mx-auto flex max-w-4xl items-center justify-between gap-3">
+      <header className="sticky top-0 z-10 bg-primary px-4 py-3 pr-4 text-primary-foreground shadow-md md:pr-[470px] lg:pr-[560px]">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <Logo size="sm" className="shadow-sm" />
             <div>
@@ -169,8 +169,8 @@ export default function InventoryScreen() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-4xl space-y-4 p-4">
-        <div className="grid gap-3 md:grid-cols-4">
+      <main className="mx-auto max-w-6xl space-y-4 p-3 sm:p-4 xl:p-5">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           <Summary label="Items" value={String(items.length)} />
           <Summary label="Tracked" value={String(items.filter((item) => item.trackStock).length)} />
           <Summary label="Low Stock" value={String(lowStockCount)} danger={lowStockCount > 0} />
@@ -182,12 +182,12 @@ export default function InventoryScreen() {
             <Plus className="h-5 w-5 text-primary" />
             <h2 className="font-serif text-lg font-bold">Add Menu Item</h2>
           </div>
-          <div className="grid gap-2 md:grid-cols-6">
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-6">
             <Input
               value={draftItem.name}
               onChange={(event) => setDraftItem((current) => ({ ...current, name: event.target.value }))}
               placeholder="Item name"
-              className="md:col-span-2"
+              className="lg:col-span-2"
             />
             <Input
               value={draftItem.category}
@@ -244,7 +244,7 @@ export default function InventoryScreen() {
           </div>
         )}
 
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {filteredItems.map((item) => {
             const lowStock = item.trackStock && item.stockQty <= item.minStockQty;
             return (
@@ -279,15 +279,15 @@ export default function InventoryScreen() {
 
                 <div className="mt-4 grid grid-cols-3 gap-2">
                   <Button variant="outline" onClick={() => changeStock(item, "reduce")} disabled={!item.trackStock}>
-                    <Minus className="mr-1 h-4 w-4" />
-                    Reduce
+                    <Minus className="h-4 w-4 sm:mr-1" />
+                    <span className="hidden sm:inline">Reduce</span>
                   </Button>
                   <Button variant="outline" onClick={() => adjustMinimum(item)}>
-                    <Package className="mr-1 h-4 w-4" />
+                    <Package className="h-4 w-4 sm:mr-1" />
                     Min
                   </Button>
                   <Button onClick={() => changeStock(item, "add")} disabled={!item.trackStock}>
-                    <Plus className="mr-1 h-4 w-4" />
+                    <Plus className="h-4 w-4 sm:mr-1" />
                     Add
                   </Button>
                 </div>
