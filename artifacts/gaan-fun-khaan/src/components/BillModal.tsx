@@ -36,7 +36,7 @@ export default function BillModal({ bill, isOpen, onClose, onNewBill }: BillModa
     try {
       setIsDownloading(true);
       setDownloadError("");
-      await downloadBillPdf("premium-bill", `bill-${bill.id}.pdf`);
+      downloadBillPdf(bill, `bill-${bill.id}.pdf`);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not generate PDF.";
       setDownloadError(`${message} Please use Print and choose Save as PDF if this browser blocks download.`);
