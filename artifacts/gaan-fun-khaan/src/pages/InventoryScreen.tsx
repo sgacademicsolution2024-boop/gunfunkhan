@@ -14,16 +14,33 @@ const fallbackItems: PosMenuItem[] = MENU_ITEMS.map((item) => ({
   price: item.price,
   category: item.category,
   stockQty: 0,
-  minStockQty: 0,
-  trackStock: false,
+  minStockQty: 5,
+  trackStock: true,
   isAvailable: true,
 }));
 
+const LOCAL_INVENTORY_KEY = "gfk_inventory_items";
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function getLocalInventory(): PosMenuItem[] {
+  try {
+    const raw = localStorage.getItem(LOCAL_INVENTORY_KEY);
+    return raw ? JSON.parse(raw) : fallbackItems;
+  } catch {
+    return fallbackItems;
+  }
+}
+
+function saveLocalInventory(items: PosMenuItem[]) {
+  localStorage.setItem(LOCAL_INVENTORY_KEY, JSON.stringify(items));
+}
+
 export default function InventoryScreen() {
   const [restaurant, setRestaurant] = useState<RestaurantSettings>(defaultRestaurantSettings);
-  const [items, setItems] = useState<PosMenuItem[]>(fallbackItems);
+  const [items, setItems] = useState<PosMenuItem[]>(() => getLocalInventory());
   const [query, setQuery] = useState("");
   const [notice, setNotice] = useState("");
+  const [stockInputs, setStockInputs] = useState<Record<string, string>>({});
   const [draftItem, setDraftItem] = useState({
     name: "",
     category: "Snacks",
@@ -47,9 +64,16 @@ export default function InventoryScreen() {
 
       setRestaurant(cloudRestaurant);
       const cloudItems = await getMenuItems(cloudRestaurant.id);
-      setItems(cloudItems.length > 0 ? cloudItems : fallbackItems);
-      setNotice("");
+      if (cloudItems.length > 0) {
+        setItems(cloudItems);
+        setNotice("");
+      } else {
+        const localItems = getLocalInventory();
+        setItems(localItems);
+        setNotice("Using local inventory until Supabase menu items are seeded. First edit will create that item in Supabase.");
+      }
     } catch (error) {
+      setItems(getLocalInventory());
       setNotice(error instanceof Error ? error.message : "Inventory is using local demo items.");
     }
   }
@@ -65,7 +89,11 @@ export default function InventoryScreen() {
   const lowStockCount = items.filter((item) => item.trackStock && item.stockQty <= item.minStockQty).length;
 
   async function saveItem(nextItem: PosMenuItem, movement?: { type: "add" | "reduce" | "adjust"; quantity: number; note: string }) {
-    setItems((current) => current.map((item) => (item.id === nextItem.id ? nextItem : item)));
+    setItems((current) => {
+      const updated = current.map((item) => (item.id === nextItem.id ? nextItem : item));
+      if (!restaurant.id || !UUID_PATTERN.test(nextItem.id)) saveLocalInventory(updated);
+      return updated;
+    });
 
     if (!restaurant.id) {
       setNotice("Inventory changes are shown locally. Connect Supabase and save restaurant settings to persist them.");
@@ -73,10 +101,27 @@ export default function InventoryScreen() {
     }
 
     try {
-      await updateMenuItem(restaurant.id, nextItem);
-      if (movement && movement.quantity !== 0) {
+      const savedItem = UUID_PATTERN.test(nextItem.id)
+        ? await updateMenuItem(restaurant.id, nextItem)
+        : await createMenuItem(restaurant.id, {
+            name: nextItem.name,
+            category: nextItem.category,
+            price: nextItem.price,
+            stockQty: nextItem.stockQty,
+            minStockQty: nextItem.minStockQty,
+            trackStock: nextItem.trackStock,
+            isAvailable: nextItem.isAvailable,
+          });
+
+      setItems((current) => {
+        const updated = current.map((item) => (item.id === nextItem.id ? savedItem : item));
+        saveLocalInventory(updated);
+        return updated;
+      });
+
+      if (movement && movement.quantity !== 0 && savedItem.trackStock) {
         await addInventoryMovement(restaurant.id, {
-          menu_item_id: nextItem.id,
+          menu_item_id: savedItem.id,
           movement_type: movement.type,
           quantity: movement.quantity,
           note: movement.note,
@@ -84,21 +129,24 @@ export default function InventoryScreen() {
       }
       setNotice("Inventory saved.");
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : "Could not save inventory change.");
-      await loadInventory();
+      saveLocalInventory(items.map((item) => (item.id === nextItem.id ? nextItem : item)));
+      setNotice(error instanceof Error ? `Saved locally. Supabase issue: ${error.message}` : "Saved locally. Could not sync inventory change.");
     }
   }
 
   function changeStock(item: PosMenuItem, direction: "add" | "reduce") {
-    const input = window.prompt(direction === "add" ? "Quantity to add" : "Quantity to reduce", "1");
-    const qty = Number(input);
-    if (!input || !Number.isFinite(qty) || qty <= 0) return;
+    const qty = Number(stockInputs[item.id] || 1);
+    if (!Number.isFinite(qty) || qty <= 0) {
+      setNotice("Enter a stock quantity greater than 0.");
+      return;
+    }
 
     const signedQty = direction === "add" ? qty : -qty;
     saveItem(
       { ...item, stockQty: item.stockQty + signedQty },
       { type: direction, quantity: signedQty, note: direction === "add" ? "Manual stock add" : "Manual stock reduce" },
     );
+    setStockInputs((current) => ({ ...current, [item.id]: "1" }));
   }
 
   function adjustMinimum(item: PosMenuItem) {
@@ -131,12 +179,20 @@ export default function InventoryScreen() {
 
     if (!restaurant.id) {
       const localItem = { ...nextItem, id: `local-${Date.now()}` };
-      setItems((current) => [localItem, ...current]);
+      setItems((current) => {
+        const updated = [localItem, ...current];
+        saveLocalInventory(updated);
+        return updated;
+      });
       setNotice("Item added locally. Save restaurant settings and seed Supabase to persist menu changes.");
     } else {
       try {
         const saved = await createMenuItem(restaurant.id, nextItem);
-        setItems((current) => [saved, ...current]);
+        setItems((current) => {
+          const updated = [saved, ...current];
+          saveLocalInventory(updated);
+          return updated;
+        });
         if (saved.trackStock && saved.stockQty > 0) {
           await addInventoryMovement(restaurant.id, {
             menu_item_id: saved.id,
@@ -277,20 +333,29 @@ export default function InventoryScreen() {
                   <Switch checked={item.isAvailable} onCheckedChange={(isAvailable) => saveItem({ ...item, isAvailable })} />
                 </div>
 
-                <div className="mt-4 grid grid-cols-3 gap-2">
+                <div className="mt-4 grid grid-cols-[1fr_auto_auto] gap-2">
+                  <Input
+                    type="number"
+                    min="1"
+                    value={stockInputs[item.id] ?? "1"}
+                    onChange={(event) => setStockInputs((current) => ({ ...current, [item.id]: event.target.value }))}
+                    className="h-10 bg-white text-center font-bold tabular-nums"
+                    disabled={!item.trackStock}
+                    aria-label={`Stock quantity for ${item.name}`}
+                  />
                   <Button variant="outline" onClick={() => changeStock(item, "reduce")} disabled={!item.trackStock}>
                     <Minus className="h-4 w-4 sm:mr-1" />
                     <span className="hidden sm:inline">Reduce</span>
-                  </Button>
-                  <Button variant="outline" onClick={() => adjustMinimum(item)}>
-                    <Package className="h-4 w-4 sm:mr-1" />
-                    Min
                   </Button>
                   <Button onClick={() => changeStock(item, "add")} disabled={!item.trackStock}>
                     <Plus className="h-4 w-4 sm:mr-1" />
                     Add
                   </Button>
                 </div>
+                <Button variant="outline" onClick={() => adjustMinimum(item)} className="mt-2 w-full">
+                  <Package className="mr-1 h-4 w-4" />
+                  Set Minimum Stock
+                </Button>
               </div>
             );
           })}
