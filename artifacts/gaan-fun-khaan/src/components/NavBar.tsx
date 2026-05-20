@@ -14,6 +14,26 @@ export default function NavBar() {
 
   return (
     <>
+      {/* Desktop top nav */}
+      <div className="fixed right-4 top-3 z-50 hidden rounded-full border border-white/20 bg-white/90 px-2 py-1 shadow-lg backdrop-blur md:flex">
+        {links.map(({ href, label, icon: Icon }) => {
+          const isActive = location === href;
+          return (
+            <Link
+              key={href}
+              href={href}
+              className={`flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-bold transition-colors ${
+                isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              }`}
+              data-testid={`nav-desktop-${label.toLowerCase()}`}
+            >
+              <Icon size={16} strokeWidth={isActive ? 2.5 : 2} />
+              <span>{label}</span>
+            </Link>
+          );
+        })}
+      </div>
+
       {/* Mobile bottom nav */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50 pb-safe">
         <div className="flex justify-around items-center h-16">

@@ -20,6 +20,7 @@ export default function BillModal({ bill, isOpen, onClose, onNewBill }: BillModa
   const [showWhatsApp, setShowWhatsApp] = useState(false);
   const [phone, setPhone] = useState("");
   const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState("");
 
   if (!bill) return null;
 
@@ -34,7 +35,11 @@ export default function BillModal({ bill, isOpen, onClose, onNewBill }: BillModa
   const handleDownload = async () => {
     try {
       setIsDownloading(true);
+      setDownloadError("");
       await downloadBillPdf("premium-bill", `bill-${bill.id}.pdf`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Could not generate PDF.";
+      setDownloadError(`${message} Please use Print and choose Save as PDF if this browser blocks download.`);
     } finally {
       setIsDownloading(false);
     }
@@ -177,6 +182,12 @@ export default function BillModal({ bill, isOpen, onClose, onNewBill }: BillModa
                 Open
               </button>
             </div>
+          </div>
+        )}
+
+        {downloadError && (
+          <div className="border-t border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900">
+            {downloadError}
           </div>
         )}
 

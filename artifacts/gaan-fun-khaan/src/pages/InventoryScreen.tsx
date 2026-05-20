@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { AlertTriangle, Minus, Package, Plus, Search } from "lucide-react";
+import { AlertTriangle, Minus, Package, Plus, Save, Search } from "lucide-react";
 import type { PosMenuItem, RestaurantSettings } from "@/types/billing";
 import { MENU_ITEMS } from "@/data/menu";
-import { addInventoryMovement, defaultRestaurantSettings, getMenuItems, getMyRestaurant, updateMenuItem } from "@/lib/posApi";
+import { addInventoryMovement, createMenuItem, defaultRestaurantSettings, getMenuItems, getMyRestaurant, updateMenuItem } from "@/lib/posApi";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,14 @@ export default function InventoryScreen() {
   const [items, setItems] = useState<PosMenuItem[]>(fallbackItems);
   const [query, setQuery] = useState("");
   const [notice, setNotice] = useState("");
+  const [draftItem, setDraftItem] = useState({
+    name: "",
+    category: "Snacks",
+    price: "",
+    stockQty: "0",
+    minStockQty: "0",
+    trackStock: true,
+  });
 
   useEffect(() => {
     loadInventory();
@@ -100,6 +108,52 @@ export default function InventoryScreen() {
     saveItem({ ...item, minStockQty }, { type: "adjust", quantity: 0, note: "Minimum stock updated" });
   }
 
+  async function addNewItem() {
+    if (!draftItem.name.trim()) {
+      setNotice("Enter an item name first.");
+      return;
+    }
+
+    const nextItem: Omit<PosMenuItem, "id"> = {
+      name: draftItem.name.trim(),
+      category: draftItem.category.trim() || "Other",
+      price: draftItem.price === "" ? null : Number(draftItem.price),
+      stockQty: Number(draftItem.stockQty || 0),
+      minStockQty: Number(draftItem.minStockQty || 0),
+      trackStock: draftItem.trackStock,
+      isAvailable: true,
+    };
+
+    if (!Number.isFinite(nextItem.price ?? 0) || !Number.isFinite(nextItem.stockQty) || !Number.isFinite(nextItem.minStockQty)) {
+      setNotice("Check price and stock numbers.");
+      return;
+    }
+
+    if (!restaurant.id) {
+      const localItem = { ...nextItem, id: `local-${Date.now()}` };
+      setItems((current) => [localItem, ...current]);
+      setNotice("Item added locally. Save restaurant settings and seed Supabase to persist menu changes.");
+    } else {
+      try {
+        const saved = await createMenuItem(restaurant.id, nextItem);
+        setItems((current) => [saved, ...current]);
+        if (saved.trackStock && saved.stockQty > 0) {
+          await addInventoryMovement(restaurant.id, {
+            menu_item_id: saved.id,
+            movement_type: "add",
+            quantity: saved.stockQty,
+            note: "Opening stock",
+          });
+        }
+        setNotice("Menu item added.");
+      } catch (error) {
+        setNotice(error instanceof Error ? error.message : "Could not add menu item.");
+      }
+    }
+
+    setDraftItem({ name: "", category: "Snacks", price: "", stockQty: "0", minStockQty: "0", trackStock: true });
+  }
+
   return (
     <div className="min-h-screen bg-background pb-24 md:pb-6">
       <header className="sticky top-0 z-10 bg-primary px-4 py-3 text-primary-foreground shadow-md">
@@ -116,6 +170,64 @@ export default function InventoryScreen() {
       </header>
 
       <main className="mx-auto max-w-4xl space-y-4 p-4">
+        <div className="grid gap-3 md:grid-cols-4">
+          <Summary label="Items" value={String(items.length)} />
+          <Summary label="Tracked" value={String(items.filter((item) => item.trackStock).length)} />
+          <Summary label="Low Stock" value={String(lowStockCount)} danger={lowStockCount > 0} />
+          <Summary label="Hidden" value={String(items.filter((item) => !item.isAvailable).length)} />
+        </div>
+
+        <div className="rounded-xl border bg-card p-4 shadow-sm">
+          <div className="mb-3 flex items-center gap-2">
+            <Plus className="h-5 w-5 text-primary" />
+            <h2 className="font-serif text-lg font-bold">Add Menu Item</h2>
+          </div>
+          <div className="grid gap-2 md:grid-cols-6">
+            <Input
+              value={draftItem.name}
+              onChange={(event) => setDraftItem((current) => ({ ...current, name: event.target.value }))}
+              placeholder="Item name"
+              className="md:col-span-2"
+            />
+            <Input
+              value={draftItem.category}
+              onChange={(event) => setDraftItem((current) => ({ ...current, category: event.target.value }))}
+              placeholder="Category"
+            />
+            <Input
+              type="number"
+              value={draftItem.price}
+              onChange={(event) => setDraftItem((current) => ({ ...current, price: event.target.value }))}
+              placeholder="Price"
+            />
+            <Input
+              type="number"
+              value={draftItem.stockQty}
+              onChange={(event) => setDraftItem((current) => ({ ...current, stockQty: event.target.value }))}
+              placeholder="Stock"
+            />
+            <Input
+              type="number"
+              value={draftItem.minStockQty}
+              onChange={(event) => setDraftItem((current) => ({ ...current, minStockQty: event.target.value }))}
+              placeholder="Min"
+            />
+          </div>
+          <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <label className="flex items-center justify-between gap-3 rounded-lg bg-muted/50 px-3 py-2 text-sm font-bold sm:min-w-48">
+              Track stock
+              <Switch
+                checked={draftItem.trackStock}
+                onCheckedChange={(trackStock) => setDraftItem((current) => ({ ...current, trackStock }))}
+              />
+            </label>
+            <Button onClick={addNewItem} className="sm:w-auto">
+              <Save className="mr-2 h-4 w-4" />
+              Add Item
+            </Button>
+          </div>
+        </div>
+
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -193,6 +305,15 @@ function Metric({ label, value }: { label: string; value: string }) {
     <div className="rounded-lg bg-muted/40 px-2 py-2">
       <p className="text-[10px] font-black uppercase text-muted-foreground">{label}</p>
       <p className="mt-1 truncate text-sm font-black tabular-nums text-foreground">{value}</p>
+    </div>
+  );
+}
+
+function Summary({ label, value, danger = false }: { label: string; value: string; danger?: boolean }) {
+  return (
+    <div className={`rounded-xl border bg-card p-4 shadow-sm ${danger ? "border-destructive/30" : ""}`}>
+      <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">{label}</p>
+      <p className={`mt-1 text-2xl font-black tabular-nums ${danger ? "text-destructive" : "text-primary"}`}>{value}</p>
     </div>
   );
 }
