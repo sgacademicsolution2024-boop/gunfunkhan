@@ -21,6 +21,7 @@ export default function BillModal({ bill, isOpen, onClose, onNewBill }: BillModa
   const [phone, setPhone] = useState("");
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState("");
+  const [pdfUrl, setPdfUrl] = useState("");
 
   if (!bill) return null;
 
@@ -36,7 +37,10 @@ export default function BillModal({ bill, isOpen, onClose, onNewBill }: BillModa
     try {
       setIsDownloading(true);
       setDownloadError("");
-      downloadBillPdf(bill, `bill-${bill.id}.pdf`);
+      if (pdfUrl) URL.revokeObjectURL(pdfUrl);
+      const result = downloadBillPdf(bill, `bill-${bill.id}.pdf`);
+      setPdfUrl(result.url);
+      setDownloadError("PDF generated. If the download did not start, use Open PDF below and save it from the browser.");
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not generate PDF.";
       setDownloadError(`${message} Please use Print and choose Save as PDF if this browser blocks download.`);
@@ -53,6 +57,8 @@ export default function BillModal({ bill, isOpen, onClose, onNewBill }: BillModa
   const handleNewBill = () => {
     setShowWhatsApp(false);
     setPhone("");
+    if (pdfUrl) URL.revokeObjectURL(pdfUrl);
+    setPdfUrl("");
     onNewBill();
     onClose();
   };
@@ -60,6 +66,8 @@ export default function BillModal({ bill, isOpen, onClose, onNewBill }: BillModa
   const handleClose = () => {
     setShowWhatsApp(false);
     setPhone("");
+    if (pdfUrl) URL.revokeObjectURL(pdfUrl);
+    setPdfUrl("");
     onClose();
   };
 
@@ -188,6 +196,16 @@ export default function BillModal({ bill, isOpen, onClose, onNewBill }: BillModa
         {downloadError && (
           <div className="border-t border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900">
             {downloadError}
+            {pdfUrl && (
+              <a
+                href={pdfUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ml-2 inline-flex rounded-md bg-amber-100 px-2 py-1 font-black text-amber-950 underline"
+              >
+                Open PDF
+              </a>
+            )}
           </div>
         )}
 

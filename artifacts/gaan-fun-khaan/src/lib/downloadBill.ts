@@ -13,7 +13,12 @@ function addWrappedText(pdf: jsPDF, text: string, x: number, y: number, maxWidth
   return y + lines.length * lineHeight;
 }
 
-export function downloadBillPdf(bill: Bill, fileName: string): void {
+export type BillPdfResult = {
+  fileName: string;
+  url: string;
+};
+
+export function downloadBillPdf(bill: Bill, fileName: string): BillPdfResult {
   const restaurant = bill.restaurant || defaultRestaurantSettings;
   const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
   const pageWidth = pdf.internal.pageSize.getWidth();
@@ -147,5 +152,15 @@ export function downloadBillPdf(bill: Bill, fileName: string): void {
   pdf.setTextColor(71, 85, 105);
   pdf.text("Come for the Gaan, Stay for the Khaan!", pageWidth / 2, y, { align: "center" });
 
-  pdf.save(fileName);
+  const blob = pdf.output("blob");
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  link.rel = "noopener";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  return { fileName, url };
 }
